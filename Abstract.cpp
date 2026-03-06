@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
+#include <string>
 using namespace std;
 
 //named constants
@@ -30,6 +31,7 @@ private:
     public:
         Movie();
         Movie(string);
+        Movie(const Movie&); 
         ~Movie();
 
         void setTitle(string);
@@ -52,6 +54,12 @@ int main()
 
     //loading comments from file
     vector<string> comments = loadComments("reviews.txt");
+
+    if (comments.size() == 0)
+    {
+        cout << "No comments were loaded from the file.\n";
+        return 1;
+    }
 
     //creating movie objects
     movies.push_back(Movie("The Last Horizon"));
@@ -84,7 +92,19 @@ int main()
     return 0;
 }
 //Function definations
+Movie::Movie(const Movie& other)
+{
+    title = other.title;
+    head = nullptr;
 
+    Node* current = other.head;
+
+    while (current)
+    {
+        addReview(current->rating, current->comment);
+        current = current->next;
+    }
+}
 //default constructor 
 Movie::Movie()
 {
@@ -156,5 +176,43 @@ void Movie::outputReviews()
 //deleteList()
 void Movie::deleteList()
 {
-    Node* current
+    Node* current = head;
+
+    while (current)
+    {
+        Node* temp = current;
+        current = current->next;
+        delete temp;
+    }
+    head = nullptr;
+}
+
+//generateRating() returns 1.0-5.0 with 1 decimal 
+double generateRating()
+{
+    int value = rand() % 41 + 10; //10-50
+    return value / 10.0;
+}
+
+//loadComments() reads comments from the file 
+vector<string> loadComments(string filename)
+{
+    vector<string> comments;
+    ifstream fin(filename);
+
+    if (!fin)
+    {
+        cout << "Error opening file.\n";
+        return comments;
+    }
+
+    string line;
+
+    while (getline(fin, line))
+    {
+        comments.push_back(line);
+    }
+
+    fin.close();
+    return comments;
 }
